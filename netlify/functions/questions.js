@@ -30,7 +30,7 @@ async function generateDailyPools() {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const msg = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-5',
     max_tokens: 7000,
     messages: [{
       role: 'user',
@@ -77,7 +77,7 @@ async function generateMore(difficulty, count) {
   const names = ['easy', 'medium', 'hard', 'expert'];
 
   const msg = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-5',
     max_tokens: 2500,
     messages: [{
       role: 'user',
