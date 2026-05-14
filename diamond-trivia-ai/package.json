@@ -1,0 +1,10 @@
+{
+  "name": "on-deck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "On Deck: daily trivia with baseball scoring and AI-generated questions",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@netlify/blobs": "^8.1.0"
+  }
+}
