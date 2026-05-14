@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>On Deck — Daily Trivia</title>
+<meta name="description" content="Daily trivia with baseball scoring. AI-generated questions every day. One shot. No account needed.">
+<meta property="og:title" content="On Deck">
+<meta property="og:description" content="Daily trivia with baseball scoring. One shot a day. AI-generated questions, no account needed.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚾</text></svg>">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f4f4f5;--bg3:#e4e4e7;
+  --bgsuccess:#f0fdf4;--bgdanger:#fef2f2;--bgwarn:#fffbeb;--bginfo:#eff6ff;
+  --text:#18181b;--text2:#71717a;
+  --ok:#16a34a;--no:#dc2626;--warn:#d97706;--info:#2563eb;
+  --bd:#d4d4d8;--bd2:#e4e4e7;
+  --bdok:#bbf7d0;--bdno:#fecaca;--bdwarn:#fde68a;--bdinfo:#bfdbfe;
+  --r:8px;--rl:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#09090b;--bg2:#18181b;--bg3:#27272a;
+  --bgsuccess:#052e16;--bgdanger:#450a0a;--bgwarn:#431407;--bginfo:#172554;
+  --text:#fafafa;--text2:#a1a1aa;
+  --ok:#4ade80;--no:#f87171;--warn:#fbbf24;--info:#60a5fa;
+  --bd:#27272a;--bd2:#18181b;
+  --bdok:#166534;--bdno:#991b1b;--bdwarn:#92400e;--bdinfo:#1e3a8a;
+}}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+.page{max-width:640px;margin:0 auto;padding:0 16px 48px}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--bd2);margin-bottom:20px}
+.site-name{font-size:17px;font-weight:800;letter-spacing:-.4px}
+.site-name span{opacity:.45;font-weight:400;font-size:14px;margin-left:5px}
+.hdate{font-size:12px;color:var(--text2);font-weight:500}
+footer{text-align:center;padding:24px 0 0;font-size:12px;color:var(--text2);border-top:1px solid var(--bd2);margin-top:32px}
+@keyframes pop{0%{transform:scale(.88);opacity:0}65%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+@keyframes slide{0%{transform:translateY(6px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.apop{animation:pop .22s cubic-bezier(.34,1.56,.64,1)}
+.aslide{animation:slide .18s ease}
+.spinner{display:inline-block;width:22px;height:22px;border:2.5px solid var(--bd2);border-top-color:var(--info);border-radius:50%;animation:spin .8s linear infinite}
+.lay{display:flex;gap:1rem;align-items:flex-start}
+.dmw{flex:0 0 178px}
+.card{background:var(--bg);border:1px solid var(--bd2);border-radius:var(--rl);padding:1rem}
+button{font-family:inherit;font-size:14px;padding:9px 18px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--text);cursor:pointer;transition:background .12s,border-color .12s;font-weight:500}
+button:hover{background:var(--bg3)}
+.btnp{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:700}
+.btnp:hover{opacity:.88;background:var(--text)}
+.aopt{display:block;width:100%;text-align:left;padding:9px 12px;margin:5px 0;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--text);font-size:14px;cursor:pointer;transition:background .1s;font-family:inherit;font-weight:400}
+.aopt:hover{background:var(--bg3)}
+.pcard{border-radius:var(--rl);border:1px solid var(--bd);padding:11px 13px;cursor:pointer;text-align:left;background:var(--bg2);transition:transform .12s,box-shadow .12s;font-family:inherit;width:100%}
+.pcard:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.sbar{background:var(--bg2);border-radius:var(--rl);padding:10px 14px;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+@media(max-width:520px){.lay{flex-direction:column}.dmw{align-self:center;width:100%;max-width:220px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="site-name">⚾ On Deck <span>Daily Trivia</span></div>
+    <div class="hdate" id="hdate"></div>
+  </header>
+  <main id="root"></main>
+  <footer>AI-generated questions every day &middot; One shot &middot; No account needed &middot; Share your score</footer>
+</div>
+<script>
+/* ================================================================
+   FALLBACK QUESTIONS
+   Used if the server is unreachable. 5 per difficulty level.
+   ================================================================ */
+const FALLBACK = {
+  0:[
+    {q:"What is the largest planet in our solar system?",o:["Saturn","Jupiter","Neptune","Uranus"],a:1,f:"Jupiter is so massive that all other planets could fit inside it with room to spare."},
+    {q:"What is the fastest land animal?",o:["Lion","Horse","Cheetah","Greyhound"],a:2,f:"Cheetahs hit 112 km/h but can only maintain top speed for about 30 seconds."},
+    {q:"Who wrote the Harry Potter series?",o:["Roald Dahl","Stephenie Meyer","J.K. Rowling","C.S. Lewis"],a:2,f:"J.K. Rowling published the first Harry Potter book in 1997 after many publisher rejections."},
+    {q:"What planet is known as the Red Planet?",o:["Venus","Mars","Mercury","Jupiter"],a:1,f:"Mars looks red because of iron oxide — rust — on its surface and in its atmosphere."},
+    {q:"What is the capital of Germany?",o:["Munich","Hamburg","Frankfurt","Berlin"],a:3,f:"Berlin became the capital of reunified Germany in 1990 after the fall of the Wall."},
+  ],
+  1:[
+    {q:"What is the smallest country in the world by area?",o:["Monaco","Liechtenstein","Vatican City","San Marino"],a:2,f:"Vatican City covers just 0.44 km² and is entirely surrounded by Rome, Italy."},
+    {q:"Who was the first person to walk on the moon?",o:["Buzz Aldrin","Yuri Gagarin","Neil Armstrong","John Glenn"],a:2,f:"Armstrong stepped onto the moon on July 20, 1969, saying 'one small step for man...'"},
+    {q:"What is the capital of Australia?",o:["Sydney","Melbourne","Perth","Canberra"],a:3,f:"Canberra was purpose-built as a compromise capital between rival cities Sydney and Melbourne."},
+    {q:"Who wrote the novel 1984?",o:["Aldous Huxley","H.G. Wells","George Orwell","Ray Bradbury"],a:2,f:"Orwell published 1984 in 1949. It coined 'Big Brother,' 'doublethink,' and 'Newspeak.'"},
+    {q:"What does DNA stand for?",o:["Digital Nucleic Acid","Deoxyribonucleic Acid","Dual Nitrogen Assembly","Dynamic Nucleic Analyzer"],a:1,f:"DNA's structure was described in 1953 by Watson and Crick, building on Rosalind Franklin's X-ray work."},
+  ],
+  2:[
+    {q:"What is the smallest bone in the human body?",o:["Malleus","Incus","Stapes","Patella"],a:2,f:"The stapes, in the middle ear, measures about 3 mm — the size of a grain of rice."},
+    {q:"In what year was the Magna Carta signed?",o:["1200","1215","1230","1265"],a:1,f:"King John signed the Magna Carta in 1215, establishing that even the king was subject to law."},
+    {q:"What was the first country to grant women the right to vote?",o:["Australia","Finland","United Kingdom","New Zealand"],a:3,f:"New Zealand granted women voting rights in 1893 — ahead of every other country in the world."},
+    {q:"In chess, which piece can only move diagonally?",o:["Rook","Knight","Bishop","Queen"],a:2,f:"Bishops always stay on the same color square — so each player always has one on each color."},
+    {q:"What is the most abundant gas in Earth's atmosphere?",o:["Oxygen","Carbon dioxide","Argon","Nitrogen"],a:3,f:"Nitrogen makes up 78% of the atmosphere. Oxygen is about 21%, and argon is almost 1%."},
+  ],
+  3:[
+    {q:"What is a group of ravens called?",o:["A murder","An unkindness","A conspiracy","A parliament"],a:1,f:"Ravens are 'an unkindness.' A murder is crows; a parliament is owls."},
+    {q:"What is the only U.S. state that borders exactly one other U.S. state?",o:["Alaska","Hawaii","Maine","Rhode Island"],a:2,f:"Maine borders only New Hampshire. Alaska and Hawaii border no other U.S. states at all."},
+    {q:"What number has its letters in alphabetical order?",o:["One","Four","Forty","Eight"],a:2,f:"F-O-R-T-Y: F(6), O(15), R(18), T(20), Y(25). 'One' has its letters in reverse alphabetical order!"},
+    {q:"What does 'SCUBA' stand for?",o:["Self-Contained Underwater Breathing Apparatus","Sealed Composite Underwater Breathing Array","Submersible Container Underwater Breathing Aid","Standard Compressed Underwater Breathing Assembly"],a:0,f:"SCUBA was developed by Jacques Cousteau and Émile Gagnan in 1943 as the 'Aqua-Lung.'"},
+    {q:"What was the first artificial satellite launched into space?",o:["Vostok","Explorer 1","Luna 1","Sputnik"],a:3,f:"The Soviet Union launched Sputnik on October 4, 1957, igniting the Space Race."},
+  ]
+};
+
+/* ================================================================
+   UTILITIES
+   ================================================================ */
+function todaySeed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()}
+function getTodayDate(){const d=new Date();return String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+function dateLabel(){return new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+function grade(r){return r===0?'Three up, three down':r<=2?'Bench Player':r<=4?'Starting Lineup':r<=6?'All-Star':r<=9?'MVP':'World Series Legend'}
+function nextGameIn(){const now=new Date(),t=new Date(now);t.setDate(t.getDate()+1);t.setHours(0,0,0,0);const ms=t-now,h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return`${h}h ${m}m`}
+
+/* ================================================================
+   QUESTION POOL STATE
+   ================================================================ */
+let POOLS = {0:[...FALLBACK[0]],1:[...FALLBACK[1]],2:[...FALLBACK[2]],3:[...FALLBACK[3]]};
+let fetchingMore = {0:false,1:false,2:false,3:false};
+let usingFallback = false;
+
+/* Load today's questions from server or localStorage cache */
+async function loadDailyQuestions(){
+  const today = getTodayDate();
+  const cacheKey = `dt_ai_${today}`;
+
+  // Check localStorage first — instant load for returning visitors
+  try{
+    const cached = localStorage.getItem(cacheKey);
+    if(cached){
+      const data = JSON.parse(cached);
+      if(data[0]?.length && data[1]?.length){
+        POOLS = {0:data[0]||[],1:data[1]||[],2:data[2]||[],3:data[3]||[]};
+        G.phase='start';render();return;
+      }
+    }
+  }catch(e){}
+
+  // Show loading screen, fetch from server
+  G.phase='loading';render();
+  try{
+    const res = await fetch('/.netlify/functions/questions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({date:today})
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+
+    POOLS = {
+      0: data['0']||data[0]||[],
+      1: data['1']||data[1]||[],
+      2: data['2']||data[2]||[],
+      3: data['3']||data[3]||[]
+    };
+
+    // Cache in localStorage so next visit is instant
+    try{ localStorage.setItem(cacheKey, JSON.stringify(POOLS)); }catch(e){}
+    G.phase='start';
+  }catch(err){
+    console.warn('Using fallback questions:', err.message);
+    usingFallback = true;
+    POOLS = {0:[...FALLBACK[0]],1:[...FALLBACK[1]],2:[...FALLBACK[2]],3:[...FALLBACK[3]]};
+    G.phase='start';
+  }
+  render();
+}
+
+/* Get next question for difficulty d, triggering overflow fetch if needed */
+function getNextQ(d){
+  const pool = POOLS[d];
+  if(!pool || pool.length === 0) return FALLBACK[d][0];
+
+  const q = pool[G.qi[d] % pool.length];
+  G.qi[d]++;
+
+  // Proactively fetch more when pool is nearly exhausted
+  const remaining = pool.length - G.qi[d];
+  if(remaining <= 2 && !fetchingMore[d]) fetchMoreQuestions(d, pool.length);
+
+  return q;
+}
+
+/* Fetch additional questions for one difficulty (overflow) */
+async function fetchMoreQuestions(d, offset){
+  fetchingMore[d] = true;
+  try{
+    const today = getTodayDate();
+    const res = await fetch('/.netlify/functions/questions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({date:today, difficulty:d, offset})
+    });
+    if(!res.ok) throw new Error();
+    const more = await res.json();
+    if(Array.isArray(more) && more.length > 0){
+      POOLS[d] = [...(POOLS[d]||[]), ...more];
+      // Update localStorage cache
+      try{
+        const cacheKey = `dt_ai_${today}`;
+        const cached = JSON.parse(localStorage.getItem(cacheKey)||'{}');
+        cached[d] = POOLS[d];
+        localStorage.setItem(cacheKey, JSON.stringify(cached));
+      }catch(e){}
+    }
+  }catch(e){ console.warn('Overflow fetch failed:', e); }
+  finally{ fetchingMore[d] = false; }
+}
+
+/* ================================================================
+   GAME STATE
+   ================================================================ */
+const SAVE_KEY = 'dt_'+todaySeed();
+
+let G = {
+  phase:'loading',
+  qi:[0,0,0,0],  // question index per difficulty
+  selD:null,
+  curQ:null,
+  outs:0,
+  runners:[false,false,false],
+  score:0,
+  log:[],
+  lastR:null
+};
+
+/* ================================================================
+   INIT
+   ================================================================ */
+function init(){
+  document.getElementById('hdate').textContent = dateLabel();
+
+  // Check if already played today
+  try{
+    const sv = localStorage.getItem(SAVE_KEY);
+    if(sv){
+      const d = JSON.parse(sv);
+      Object.assign(G,{phase:'done',score:d.score,log:d.log});
+      render();return;
+    }
+  }catch(e){}
+
+  loadDailyQuestions();
+}
+
+/* ================================================================
+   GAME LOGIC
+   ================================================================ */
+function doHit(t){
+  const adv=[1,2,3,4][t];let r=[...G.runners],runs=0;
+  for(let i=2;i>=0;i--){if(r[i]){r[i]=false;if(i+adv>=3)runs++;else r[i+adv]=true;}}
+  if(adv>3)runs++;else r[adv-1]=true;
+  G.runners=r;G.score+=runs;return runs;
+}
+
+function selectDiff(d){
+  G.selD=d;G.curQ=getNextQ(d);G.phase='playing';render();
+}
+
+function answer(idx){
+  if(G.phase!=='playing')return;
+  const q=G.curQ,ok=idx===q.a;
+  if(ok){const runs=doHit(G.selD);G.lastR={ok:true,t:G.selD,runs,fact:q.f};}
+  else{G.outs++;G.lastR={ok:false,fact:q.f,ans:q.o[q.a]};}
+  G.log.push({type:ok?'hit':'out',d:G.selD});
+  G.phase='result';render();
+}
+
+function nextPlay(){
+  if(G.outs>=3){
+    G.phase='done';
+    try{localStorage.setItem(SAVE_KEY,JSON.stringify({score:G.score,log:G.log}));}catch(e){}
+    render();return;
+  }
+  G.phase='select';render();
+}
+
+function startGame(){G.phase='select';render();}
+
+/* ================================================================
+   SHARE
+   ================================================================ */
+// ↓ Add your site URL after hosting, e.g. 'playondeck.com'
+const GAME_URL = '';
+
+function buildShare(){
+  const dc=['S','D','T','H'];
+  const plays=G.log.map(p=>`${dc[p.d]}${p.type==='hit'?'⚾':'💨'}`).join(' ');
+  const url=GAME_URL?`\nPlay at: ${GAME_URL}`:'';
+  return`⚾ On Deck — ${dateLabel()}\n${plays}\n(S=single D=double T=triple H=homer)\n${G.score} run${G.score!==1?'s':''} — ${grade(G.score)}${url}`;
+}
+
+async function doShare(){
+  const text=buildShare(),btn=document.getElementById('sg-btn');
+  try{if(navigator.share)await navigator.share({text});else throw 0;}
+  catch{
+    try{
+      await navigator.clipboard.writeText(text);
+      if(btn){btn.textContent='Copied!';btn.classList.add('btnp');setTimeout(()=>{if(btn){btn.textContent='Share score';btn.classList.remove('btnp');}},2500);}
+    }catch{if(btn)btn.textContent='Copy failed';}
+  }
+}
+
+/* ================================================================
+   DIAMOND SVG
+   ================================================================ */
+function diamond(){
+  const R=G.runners;
+  return`<svg viewBox="0 0 260 215" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;border-radius:12px">
+<defs>
+<filter id="rg" x="-100%" y="-100%" width="300%" height="300%">
+<feGaussianBlur stdDeviation="5" result="b"/>
+<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
+<radialGradient id="ofg" cx="50%" cy="90%" r="70%"><stop offset="0%" stop-color="#2d6b2d"/><stop offset="100%" stop-color="#143a14"/></radialGradient>
+<radialGradient id="ifg" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#1f521f"/><stop offset="100%" stop-color="#163616"/></radialGradient>
+</defs>
+<rect width="260" height="215" fill="#0c1a0c" rx="12"/>
+<path d="M 9,198 C 28,18 232,18 251,198 Z" fill="url(#ofg)"/>
+<path d="M 18,198 C 36,32 224,32 242,198" fill="none" stroke="#6b4518" stroke-width="13" opacity="0.85"/>
+<line x1="130" y1="198" x2="4" y2="36" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+<line x1="130" y1="198" x2="256" y2="36" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+<polygon points="130,56 210,128 130,198 50,128" fill="#9c6428"/>
+<polygon points="130,80 194,128 130,178 66,128" fill="url(#ifg)"/>
+<ellipse cx="130" cy="128" rx="16" ry="11" fill="#9c6428"/>
+<ellipse cx="130" cy="126" rx="10" ry="7" fill="#b07838"/>
+${R[2]?`<circle cx="50" cy="128" r="20" fill="#ff7700" opacity="0.3" filter="url(#rg)"/><circle cx="50" cy="128" r="14" fill="#ff8c00" stroke="rgba(255,255,255,0.5)" stroke-width="2" filter="url(#rg)"/>`:''}
+${R[1]?`<circle cx="130" cy="56" r="20" fill="#ff7700" opacity="0.3" filter="url(#rg)"/><circle cx="130" cy="56" r="14" fill="#ff8c00" stroke="rgba(255,255,255,0.5)" stroke-width="2" filter="url(#rg)"/>`:''}
+${R[0]?`<circle cx="210" cy="128" r="20" fill="#ff7700" opacity="0.3" filter="url(#rg)"/><circle cx="210" cy="128" r="14" fill="#ff8c00" stroke="rgba(255,255,255,0.5)" stroke-width="2" filter="url(#rg)"/>`:''}
+<rect x="201" y="119" width="18" height="18" rx="3" fill="white" opacity="0.95"/>
+<rect x="121" y="47" width="18" height="18" rx="3" fill="white" opacity="0.95"/>
+<rect x="41" y="119" width="18" height="18" rx="3" fill="white" opacity="0.95"/>
+<polygon points="130,208 141,201 141,192 119,192 119,201" fill="white" opacity="0.95"/>
+<text x="222" y="133" font-size="9" fill="rgba(255,255,255,0.4)" font-family="system-ui,sans-serif" font-weight="600">1</text>
+<text x="127" y="44" font-size="9" fill="rgba(255,255,255,0.4)" font-family="system-ui,sans-serif" font-weight="600">2</text>
+<text x="28" y="133" font-size="9" fill="rgba(255,255,255,0.4)" font-family="system-ui,sans-serif" font-weight="600">3</text>
+</svg>`;
+}
+
+/* ================================================================
+   UI COMPONENTS
+   ================================================================ */
+function statusBar(){
+  const dc=['S','D','T','H'];
+  const plays=G.log.map(p=>{
+    const col=p.type==='hit'?'var(--ok)':'var(--no)';
+    const bg=p.type==='hit'?'var(--bgsuccess)':'var(--bgdanger)';
+    return`<span style="font-size:11px;font-weight:700;color:${col};background:${bg};padding:2px 6px;border-radius:6px">${dc[p.d]}${p.type==='hit'?'⚾':'💨'}</span>`;
+  }).join('');
+  const outDots=[0,1,2].map(i=>`<div style="width:13px;height:13px;border-radius:50%;background:${i<G.outs?'var(--no)':'var(--bd)'}"></div>`).join('');
+  return`<div class="sbar">
+<div><div class="lbl">Runs</div><div style="font-size:34px;font-weight:900;line-height:1;letter-spacing:-1.5px">${G.score}</div></div>
+<div style="flex:1;display:flex;flex-wrap:wrap;gap:3px;justify-content:center;padding:0 4px">
+${G.log.length?plays:'<span style="font-size:12px;color:var(--text2)">Step up to the plate</span>'}
+</div>
+<div style="text-align:right"><div class="lbl">Outs</div><div style="display:flex;gap:5px;justify-content:flex-end;margin-top:3px">${outDots}</div></div>
+</div>`;
+}
+
+function selectCard(){
+  const ops=[
+    {lbl:'Easy',name:'Single',desc:'General knowledge',tc:'var(--text2)',bc:'var(--bd)',bg:'var(--bg2)'},
+    {lbl:'Medium',name:'Double',desc:'Broader knowledge',tc:'var(--info)',bc:'var(--bdinfo)',bg:'var(--bginfo)'},
+    {lbl:'Hard',name:'Triple',desc:'Specific facts',tc:'var(--warn)',bc:'var(--bdwarn)',bg:'var(--bgwarn)'},
+    {lbl:'Expert',name:'Homer',desc:'Deep knowledge',tc:'var(--no)',bc:'var(--bdno)',bg:'var(--bgdanger)'},
+  ];
+  const cards=ops.map((o,i)=>`<button class="pcard" onclick="selectDiff(${i})" style="border-color:${o.bc};background:${o.bg}">
+<div style="font-size:10px;font-weight:700;color:${o.tc};text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">${o.lbl}</div>
+<div style="font-size:18px;font-weight:800;color:${o.tc};line-height:1.1;margin-bottom:2px">${o.name}</div>
+<div style="font-size:11px;color:${o.tc};opacity:.75">${o.desc}</div>
+</button>`).join('');
+  return`<div class="card aslide">
+<p style="font-size:13px;font-weight:700;margin:0 0 3px">Choose your pitch</p>
+<p style="font-size:12px;color:var(--text2);margin:0 0 10px">Harder questions earn more bases</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${cards}</div>
+</div>`;
+}
+
+function qCard(q){
+  const lbl=['Single if correct','Double if correct','Triple if correct','Home run if correct'];
+  const col=['var(--text2)','var(--info)','var(--warn)','var(--no)'];
+  const fetching=fetchingMore[G.selD]?`<div style="font-size:10px;color:var(--text2);margin-bottom:6px">Fetching more questions...</div>`:'';
+  return`<div class="card apop" style="border-left:3px solid ${col[G.selD]}">
+${fetching}
+<div style="font-size:10px;font-weight:700;color:${col[G.selD]};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${lbl[G.selD]}</div>
+<p style="font-size:15px;font-weight:600;margin:0 0 10px;line-height:1.4">${q.q}</p>
+${q.o.map((opt,i)=>`<button class="aopt" onclick="answer(${i})">${opt}</button>`).join('')}
+</div>`;
+}
+
+function rCard(){
+  const r=G.lastR,last=G.outs>=3,nxt=last?'See final score':'Next at bat →';
+  if(r.ok){
+    const labels=['SINGLE','DOUBLE','TRIPLE','HOME RUN!'];
+    const isHomer=r.t===3;
+    return`<div class="card apop" style="text-align:center">
+<div style="font-size:${isHomer?'36':'32'}px;font-weight:900;color:${isHomer?'#f59e0b':'var(--ok)'};line-height:1;margin-bottom:4px;letter-spacing:-.5px">${labels[r.t]}</div>
+${r.runs>0?`<div style="font-size:15px;font-weight:600;color:var(--ok);margin-bottom:8px">+${r.runs} run${r.runs!==1?'s':''}</div>`:'<div style="height:8px"></div>'}
+<p style="font-size:13px;color:var(--text2);margin:0 0 1rem;line-height:1.5">${r.fact}</p>
+<button onclick="nextPlay()">${nxt}</button>
+</div>`;
+  }
+  return`<div class="card apop" style="text-align:center">
+<div style="font-size:32px;font-weight:900;color:var(--no);line-height:1;margin-bottom:4px">OUT</div>
+<div style="font-size:13px;margin-bottom:8px;color:var(--text2)">Answer: <span style="font-weight:700;color:var(--text)">${r.ans}</span></div>
+<p style="font-size:13px;color:var(--text2);margin:0 0 1rem;line-height:1.5">${r.fact}</p>
+<button onclick="nextPlay()">${nxt}</button>
+</div>`;
+}
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+const root = document.getElementById('root');
+
+function render(){
+  /* ── Loading screen ── */
+  if(G.phase==='loading'){
+    root.innerHTML=`<div style="text-align:center;padding:3.5rem 1rem">
+<div style="font-size:42px;margin-bottom:1.25rem">⚾</div>
+<h3 style="font-size:17px;font-weight:700;margin:0 0 6px">Generating today's questions...</h3>
+<p style="font-size:13px;color:var(--text2);margin:0 0 1.75rem">Crafting a fresh lineup for today</p>
+<div class="spinner"></div>
+<p style="font-size:11px;color:var(--text2);margin-top:1.5rem">Takes a few seconds on your first visit each day</p>
+</div>`;
+    return;
+  }
+
+  /* ── Start screen ── */
+  if(G.phase==='start'){
+    const fallbackNote=usingFallback?`<p style="font-size:11px;color:var(--warn);margin:0 0 1rem">Using backup questions — couldn't reach the server</p>`:'';
+    root.innerHTML=`<div style="text-align:center;padding:1.5rem 1rem">
+${fallbackNote}
+<h2 style="font-size:28px;font-weight:900;letter-spacing:-1px;margin:0 0 .4rem">You're on deck.</h2>
+<p style="color:var(--text2);font-size:14px;margin:0 0 1.5rem">One inning · play until 3 outs · choose your pitch · share your daily score</p>
+<div style="display:inline-grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 2rem;text-align:left;max-width:320px">
+<div style="background:var(--bg2);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bd)"><div class="lbl" style="color:var(--text2)">Easy</div><div style="font-size:16px;font-weight:800;color:var(--text2)">Single</div></div>
+<div style="background:var(--bginfo);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bdinfo)"><div class="lbl" style="color:var(--info)">Medium</div><div style="font-size:16px;font-weight:800;color:var(--info)">Double</div></div>
+<div style="background:var(--bgwarn);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bdwarn)"><div class="lbl" style="color:var(--warn)">Hard</div><div style="font-size:16px;font-weight:800;color:var(--warn)">Triple</div></div>
+<div style="background:var(--bgdanger);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bdno)"><div class="lbl" style="color:var(--no)">Expert</div><div style="font-size:16px;font-weight:800;color:var(--no)">Homer</div></div>
+</div>
+<br><button class="btnp" onclick="startGame()" style="padding:11px 36px;font-size:16px">Play ball</button>
+</div>`;
+    return;
+  }
+
+  /* ── Done screen ── */
+  if(G.phase==='done'){
+    const dc=['S','D','T','H'];
+    const plays=G.log.map(p=>{
+      const col=p.type==='hit'?'var(--ok)':'var(--no)';
+      const bg=p.type==='hit'?'var(--bgsuccess)':'var(--bgdanger)';
+      return`<span style="font-size:13px;font-weight:700;color:${col};background:${bg};padding:3px 8px;border-radius:8px">${dc[p.d]}${p.type==='hit'?'⚾':'💨'}</span>`;
+    }).join('');
+    root.innerHTML=`<div style="padding:.25rem">
+<h2 style="font-size:20px;font-weight:800;margin:0 0 1rem;letter-spacing:-.3px">Today's Result</h2>
+<div style="background:var(--bg2);border-radius:var(--rl);padding:.9rem 1rem;margin-bottom:1rem">
+<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">${plays}</div>
+<div style="font-size:11px;color:var(--text2)">S=single · D=double · T=triple · H=homer · ⚾=hit · 💨=out</div>
+</div>
+<div style="text-align:center;padding:1rem 0">
+<div style="font-size:56px;font-weight:900;line-height:1;letter-spacing:-2.5px">${G.score}</div>
+<div style="color:var(--text2);font-size:14px;margin-top:4px">run${G.score!==1?'s':''} &middot; <span style="font-weight:700;color:var(--text)">${grade(G.score)}</span></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bd2)">
+<span style="font-size:12px;color:var(--text2)">New game in ${nextGameIn()}</span>
+<button id="sg-btn" class="btnp" onclick="doShare()">Share score</button>
+</div>
+</div>`;
+    return;
+  }
+
+  /* ── Active game ── */
+  const rightPanel = G.phase==='result' ? rCard() : G.phase==='select' ? selectCard() : qCard(G.curQ);
+  root.innerHTML=`<div>
+${statusBar()}
+<div class="lay">
+<div class="dmw">${diamond()}</div>
+<div style="flex:1;min-width:0">${rightPanel}</div>
+</div>
+</div>`;
+}
+
+init();
+</script>
+</body>
+</html>
