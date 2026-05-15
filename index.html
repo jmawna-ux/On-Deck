@@ -125,7 +125,7 @@ let loadingDiff = null;
 /* Load cached pools from localStorage on startup */
 function loadCachedPools(){
   try{
-    const cached = JSON.parse(localStorage.getItem(`dt_ai_${getTodayDate()}`)||'{}');
+    const cached = JSON.parse(localStorage.getItem(`dt_v2_${getTodayDate()}`)||'{}');
     if(cached[0]?.length) POOLS[0]=cached[0];
     if(cached[1]?.length) POOLS[1]=cached[1];
     if(cached[2]?.length) POOLS[2]=cached[2];
@@ -146,7 +146,7 @@ async function fetchPool(d, offset){
     if(Array.isArray(qs) && qs.length > 0){
       POOLS[d] = [...(POOLS[d]||[]), ...qs];
       try{
-        const ck = `dt_ai_${getTodayDate()}`;
+        const ck = `dt_v2_${getTodayDate()}`;
         const c = JSON.parse(localStorage.getItem(ck)||'{}');
         c[d]=POOLS[d]; localStorage.setItem(ck,JSON.stringify(c));
       }catch(e){}
