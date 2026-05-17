@@ -50,7 +50,7 @@ exports.handler = async (event) => {
     const { date, difficulty, offset = 0 } = JSON.parse(event.body || '{}');
     if (!date || difficulty === undefined) return { statusCode: 400, headers: h, body: JSON.stringify({ error: 'Missing date or difficulty' }) };
 
-    const cacheKey = `v2-${date}-${difficulty}`;
+    const cacheKey = `v3-${date}-${difficulty}`;
     let pool = [];
 
     if (store) {
