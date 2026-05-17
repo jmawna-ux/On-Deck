@@ -7,12 +7,13 @@ const DIFF_DESC = [
   'Expert: deep niche knowledge — etymology, obscure history, scientific nomenclature, rare facts'
 ];
 
-exports.handler = async (event) => {
-  const h = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
-  };
+function getBlobs() {
+  try { const { getStore } = require('@netlify/blobs'); return getStore('on-deck'); }
+  catch (e) { return null; }
+}
 
+exports.handler = async (event) => {
+  const h = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: h, body: '' };
 
   console.log('Function called:', new Date().toISOString());
@@ -22,38 +23,56 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers: h, body: JSON.stringify({ error: 'API key not configured' }) };
   }
 
+  const store = getBlobs();
+
   try {
     const body = JSON.parse(event.body || '{}');
-    const difficulty = body.difficulty;
+    const { date, difficulty } = body;
 
-    console.log('Generating difficulty:', difficulty);
-
-    if (difficulty === undefined || difficulty === null) {
-      return { statusCode: 400, headers: h, body: JSON.stringify({ error: 'Missing difficulty' }) };
+    if (difficulty === undefined || !date) {
+      return { statusCode: 400, headers: h, body: JSON.stringify({ error: 'Missing date or difficulty' }) };
     }
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const cacheKey = `v4-${date}-${difficulty}`;
+    console.log('Cache key:', cacheKey);
 
+    // Return cached questions if available
+    if (store) {
+      try {
+        const cached = await store.get(cacheKey, { type: 'json' });
+        if (cached && cached.length > 0) {
+          console.log('Returning', cached.length, 'cached questions');
+          return { statusCode: 200, headers: h, body: JSON.stringify(cached) };
+        }
+      } catch (e) { console.log('Cache miss'); }
+    }
+
+    // Generate fresh questions, using date in prompt for daily variety
+    console.log('Generating fresh questions for date:', date, 'difficulty:', difficulty);
+
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const msg = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 2000,
       messages: [{
         role: 'user',
-        content: `Generate 10 trivia questions. Return ONLY a valid JSON array, no markdown or extra text:
+        content: `Today is ${date}. Generate 10 fresh trivia questions for today. Return ONLY a valid JSON array, no markdown:
 [{"q":"question text","o":["A","B","C","D"],"a":0,"f":"one fun fact"}]
 "a" is the 0-indexed correct answer.
 Difficulty: ${DIFF_DESC[difficulty]}
-Rules: 4 plausible options, one correct. Fun fact = 1 interesting sentence. Topics: history, science, geography, nature, language, arts, food, technology, mythology. NO sports questions. Return ONLY the JSON array.`
+Rules: 4 plausible options, one correct. Fun fact = 1 interesting sentence. Topics: history, science, geography, nature, language, arts, food, technology, mythology. NO sports questions. Vary the topics — avoid common overused questions like capitals of Australia, planets, etc. Return ONLY the JSON array.`
       }]
     });
 
     const text = msg.content.find(b => b.type === 'text')?.text ?? '[]';
-    console.log('Raw response length:', text.length);
+    const questions = JSON.parse(text.replace(/```json?|```/g, '').trim());
+    console.log('Generated', questions.length, 'questions');
 
-    const clean = text.replace(/```json?|```/g, '').trim();
-    const questions = JSON.parse(clean);
-
-    console.log('Generated', questions.length, 'questions for difficulty', difficulty);
+    // Cache for all players today
+    if (store) {
+      try { await store.set(cacheKey, JSON.stringify(questions)); console.log('Cached successfully'); }
+      catch (e) { console.log('Cache write failed:', e.message); }
+    }
 
     return { statusCode: 200, headers: h, body: JSON.stringify(questions) };
 
