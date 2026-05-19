@@ -66,7 +66,23 @@ exports.handler = async (event) => {
     const dayNum = parseInt(date) % TOPIC_SETS.length;
     const topics = TOPIC_SETS[dayNum].join(', ');
 
-    console.log('Generating for date:', date, 'difficulty:', difficulty, 'topics:', topics);
+    // Collect questions already generated for other difficulties today
+    // so Claude avoids cross-difficulty duplicates
+    const usedQs = [];
+    if (store) {
+      for (const d of [0,1,2,3]) {
+        if (d === difficulty) continue;
+        try {
+          const other = await store.get(`v5-${date}-${d}`, { type: 'json' });
+          if (other) usedQs.push(...other.map(q => q.q));
+        } catch(e) {}
+      }
+    }
+    const avoidUsed = usedQs.length > 0
+      ? `\n\nDo NOT repeat topics from these already-used questions:\n${usedQs.slice(0,15).map((q,i)=>`${i+1}. ${q}`).join('\n')}`
+      : '';
+
+    console.log('Generating for date:', date, 'difficulty:', difficulty, 'avoiding:', usedQs.length, 'questions');
 
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const msg = await client.messages.create({
@@ -88,7 +104,7 @@ STRICT RULES:
 - NO sports questions
 - AVOID these overused questions: capitals of Australia/Canada/Brazil, planets of solar system, who wrote Harry Potter, largest ocean, fastest animal, Mona Lisa painter
 - Each question must be clearly different from the others
-- Make questions interesting and specific, not generic
+- Make questions interesting and specific, not generic${avoidUsed}
 
 Return ONLY the JSON array, nothing else.`
       }]
