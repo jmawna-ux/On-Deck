@@ -20,7 +20,8 @@
   --ok:#16a34a;--no:#dc2626;--warn:#d97706;--info:#2563eb;
   --bd:#d4d4d8;--bd2:#e4e4e7;
   --bdok:#bbf7d0;--bdno:#fecaca;--bdwarn:#fde68a;--bdinfo:#bfdbfe;
-  --r:8px;--rl:12px;
+  --r:10px;--rl:16px;
+  --accent:#e85d04;--accent2:#f48c06;
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#09090b;--bg2:#18181b;--bg3:#27272a;
@@ -29,35 +30,47 @@
   --ok:#4ade80;--no:#f87171;--warn:#fbbf24;--info:#60a5fa;
   --bd:#27272a;--bd2:#18181b;
   --bdok:#166534;--bdno:#991b1b;--bdwarn:#92400e;--bdinfo:#1e3a8a;
+  --accent:#ff7a1a;--accent2:#f48c06;
 }}
 html{font-size:16px}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 .page{max-width:640px;margin:0 auto;padding:0 16px 48px}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--bd2);margin-bottom:20px}
-.site-name{font-size:17px;font-weight:800;letter-spacing:-.4px}
-.site-name span{opacity:.45;font-weight:400;font-size:14px;margin-left:5px}
-.hdate{font-size:12px;color:var(--text2);font-weight:500}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:2px solid var(--bd2);margin-bottom:20px}
+.site-name{font-size:19px;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.site-name span{-webkit-text-fill-color:var(--text2);background:none;opacity:.55;font-weight:400;font-size:13px;margin-left:5px}
+.hdate{font-size:12px;color:var(--text2);font-weight:600;letter-spacing:.02em}
 footer{text-align:center;padding:24px 0 0;font-size:12px;color:var(--text2);border-top:1px solid var(--bd2);margin-top:32px}
-@keyframes pop{0%{transform:scale(.88);opacity:0}65%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
-@keyframes slide{0%{transform:translateY(6px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+@keyframes slide{0%{transform:translateY(8px);opacity:0}100%{transform:translateY(0);opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.apop{animation:pop .22s cubic-bezier(.34,1.56,.64,1)}
-.aslide{animation:slide .18s ease}
-.spinner{display:inline-block;width:22px;height:22px;border:2.5px solid var(--bd2);border-top-color:var(--info);border-radius:50%;animation:spin .8s linear infinite}
-.lay{display:flex;gap:1rem;align-items:flex-start}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.apop{animation:pop .25s cubic-bezier(.34,1.56,.64,1)}
+.aslide{animation:slide .2s ease}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--bd2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+.lay{display:flex;gap:12px;align-items:flex-start}
 .dmw{flex:0 0 178px}
-.card{background:var(--bg);border:1px solid var(--bd2);border-radius:var(--rl);padding:1rem}
-button{font-family:inherit;font-size:14px;padding:9px 18px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--text);cursor:pointer;transition:background .12s,border-color .12s;font-weight:500}
-button:hover{background:var(--bg3)}
-.btnp{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:700}
-.btnp:hover{opacity:.88;background:var(--text)}
-.aopt{display:block;width:100%;text-align:left;padding:9px 12px;margin:5px 0;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--text);font-size:14px;cursor:pointer;transition:background .1s;font-family:inherit;font-weight:400}
-.aopt:hover{background:var(--bg3)}
-.pcard{border-radius:var(--rl);border:1px solid var(--bd);padding:11px 13px;cursor:pointer;text-align:left;background:var(--bg2);transition:transform .12s,box-shadow .12s;font-family:inherit;width:100%}
-.pcard:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.12)}
-.sbar{background:var(--bg2);border-radius:var(--rl);padding:10px 14px;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
-@media(max-width:520px){.lay{flex-direction:column}.dmw{align-self:center;width:100%;max-width:220px}}
+.card{background:var(--bg);border:1.5px solid var(--bd2);border-radius:var(--rl);padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+button{font-family:inherit;font-size:15px;padding:11px 20px;border-radius:var(--r);border:1.5px solid var(--bd);background:var(--bg2);color:var(--text);cursor:pointer;transition:all .12s;font-weight:600}
+button:hover{background:var(--bg3);transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+.btnp{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;font-weight:800;letter-spacing:.01em;box-shadow:0 3px 12px rgba(232,93,4,.35)}
+.btnp:hover{opacity:.9;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.aopt{display:block;width:100%;text-align:left;padding:12px 14px;margin:6px 0;border-radius:var(--r);border:1.5px solid var(--bd);background:var(--bg2);color:var(--text);font-size:15px;cursor:pointer;transition:all .1s;font-family:inherit;font-weight:500;min-height:48px}
+.aopt:hover{background:var(--bg);border-color:var(--accent);transform:translateX(2px)}
+.pcard{border-radius:var(--rl);border:2px solid var(--bd);padding:14px 16px;cursor:pointer;text-align:left;background:var(--bg2);transition:all .15s;font-family:inherit;width:100%}
+.pcard:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.pcard:active{transform:translateY(-1px)}
+.sbar{border-radius:var(--rl);padding:12px 16px;margin-bottom:.85rem;display:flex;justify-content:space-between;align-items:center;gap:8px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1.5px solid var(--bd2);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.lbl{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px}
+.out-dot-on{width:13px;height:13px;border-radius:50%;background:var(--no);box-shadow:0 0 6px rgba(220,38,38,.5)}
+.out-dot-off{width:13px;height:13px;border-radius:50%;background:var(--bd);border:1.5px solid var(--bd2)}
+@media(max-width:520px){
+  .lay{flex-direction:column}
+  .dmw{align-self:center;width:100%;max-width:260px}
+  .aopt{padding:14px 16px;font-size:16px;min-height:52px}
+  .pcard{padding:16px}
+  .card{padding:1.2rem}
+}
 </style>
 </head>
 <body>
@@ -373,45 +386,52 @@ function statusBar(){
   const plays=G.log.map(p=>{
     const col=p.type==='hit'?'var(--ok)':'var(--no)';
     const bg=p.type==='hit'?'var(--bgsuccess)':'var(--bgdanger)';
-    return`<span style="font-size:11px;font-weight:700;color:${col};background:${bg};padding:2px 6px;border-radius:6px">${dc[p.d]}${p.type==='hit'?'⚾':'💨'}</span>`;
+    const border=p.type==='hit'?'var(--bdok)':'var(--bdno)';
+    return`<span style="font-size:12px;font-weight:800;color:${col};background:${bg};padding:3px 7px;border-radius:8px;border:1px solid ${border}">${dc[p.d]}${p.type==='hit'?'⚾':'💨'}</span>`;
   }).join('');
-  const outDots=[0,1,2].map(i=>`<div style="width:13px;height:13px;border-radius:50%;background:${i<G.outs?'var(--no)':'var(--bd)'}"></div>`).join('');
+  const outDots=[0,1,2].map(i=>`<div class="${i<G.outs?'out-dot-on':'out-dot-off'}"></div>`).join('');
   return`<div class="sbar">
-<div><div class="lbl">Runs</div><div style="font-size:34px;font-weight:900;line-height:1;letter-spacing:-1.5px">${G.score}</div></div>
-<div style="flex:1;display:flex;flex-wrap:wrap;gap:3px;justify-content:center;padding:0 4px">
-${G.log.length?plays:'<span style="font-size:12px;color:var(--text2)">Step up to the plate</span>'}
+<div><div class="lbl">Runs</div><div style="font-size:40px;font-weight:900;line-height:1;letter-spacing:-2px;color:var(--accent)">${G.score}</div></div>
+<div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:0 4px">
+${G.log.length?plays:'<span style="font-size:13px;font-weight:600;color:var(--text2)">Step up to the plate ⚾</span>'}
 </div>
-<div style="text-align:right"><div class="lbl">Outs</div><div style="display:flex;gap:5px;justify-content:flex-end;margin-top:3px">${outDots}</div></div>
+<div style="text-align:right"><div class="lbl">Outs</div><div style="display:flex;gap:6px;justify-content:flex-end;margin-top:4px">${outDots}</div></div>
 </div>`;
 }
 
 function selectCard(){
   const ops=[
-    {lbl:'Easy',name:'Single',desc:'General knowledge',tc:'var(--text2)',bc:'var(--bd)',bg:'var(--bg2)'},
-    {lbl:'Medium',name:'Double',desc:'Broader knowledge',tc:'var(--info)',bc:'var(--bdinfo)',bg:'var(--bginfo)'},
-    {lbl:'Hard',name:'Triple',desc:'Specific facts',tc:'var(--warn)',bc:'var(--bdwarn)',bg:'var(--bgwarn)'},
-    {lbl:'Expert',name:'Homer',desc:'Deep knowledge',tc:'var(--no)',bc:'var(--bdno)',bg:'var(--bgdanger)'},
+    {lbl:'Easy',name:'Single',desc:'General knowledge',icon:'⚾',tc:'var(--text2)',bc:'var(--bd)',bg:'var(--bg2)'},
+    {lbl:'Medium',name:'Double',desc:'Broader knowledge',icon:'🎯',tc:'var(--info)',bc:'var(--bdinfo)',bg:'var(--bginfo)'},
+    {lbl:'Hard',name:'Triple',desc:'Specific facts',icon:'⚡',tc:'var(--warn)',bc:'var(--bdwarn)',bg:'var(--bgwarn)'},
+    {lbl:'Expert',name:'Homer',desc:'Deep knowledge',icon:'🔥',tc:'var(--no)',bc:'var(--bdno)',bg:'var(--bgdanger)'},
   ];
   const cards=ops.map((o,i)=>`<button class="pcard" onclick="selectDiff(${i})" style="border-color:${o.bc};background:${o.bg}">
-<div style="font-size:10px;font-weight:700;color:${o.tc};text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">${o.lbl}</div>
-<div style="font-size:18px;font-weight:800;color:${o.tc};line-height:1.1;margin-bottom:2px">${o.name}</div>
-<div style="font-size:11px;color:${o.tc};opacity:.75">${o.desc}</div>
+<div style="font-size:24px;margin-bottom:6px">${o.icon}</div>
+<div style="font-size:10px;font-weight:800;color:${o.tc};text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px">${o.lbl}</div>
+<div style="font-size:20px;font-weight:900;color:${o.tc};line-height:1;margin-bottom:4px">${o.name}</div>
+<div style="font-size:11px;color:${o.tc};opacity:.8">${o.desc}</div>
 </button>`).join('');
   return`<div class="card aslide">
-<p style="font-size:13px;font-weight:700;margin:0 0 3px">Choose your pitch</p>
-<p style="font-size:12px;color:var(--text2);margin:0 0 10px">Harder questions earn more bases</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${cards}</div>
+<p style="font-size:14px;font-weight:800;margin:0 0 2px">Choose your pitch</p>
+<p style="font-size:12px;color:var(--text2);margin:0 0 12px">Harder = more bases if correct</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${cards}</div>
 </div>`;
 }
 
 function qCard(q){
   const lbl=['Single if correct','Double if correct','Triple if correct','Home run if correct'];
+  const icons=['⚾','🎯','⚡','🔥'];
   const col=['var(--text2)','var(--info)','var(--warn)','var(--no)'];
-  const fetching=fetchingMore[G.selD]?`<div style="font-size:10px;color:var(--text2);margin-bottom:6px">Fetching more questions...</div>`:'';
-  return`<div class="card apop" style="border-left:3px solid ${col[G.selD]}">
+  const bg=['var(--bg2)','var(--bginfo)','var(--bgwarn)','var(--bgdanger)'];
+  const fetching=fetchingMore[G.selD]?`<div style="font-size:10px;color:var(--text2);margin-bottom:6px">Loading more questions...</div>`:'';
+  return`<div class="card apop" style="border-left:4px solid ${col[G.selD]}">
 ${fetching}
-<div style="font-size:10px;font-weight:700;color:${col[G.selD]};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${lbl[G.selD]}</div>
-<p style="font-size:15px;font-weight:600;margin:0 0 10px;line-height:1.4">${q.q}</p>
+<div style="display:inline-flex;align-items:center;gap:5px;background:${bg[G.selD]};padding:3px 10px;border-radius:20px;margin-bottom:10px">
+<span style="font-size:13px">${icons[G.selD]}</span>
+<span style="font-size:10px;font-weight:800;color:${col[G.selD]};text-transform:uppercase;letter-spacing:.08em">${lbl[G.selD]}</span>
+</div>
+<p style="font-size:16px;font-weight:700;margin:0 0 12px;line-height:1.4">${q.q}</p>
 ${q.o.map((opt,i)=>`<button class="aopt" onclick="answer(${i})">${opt}</button>`).join('')}
 </div>`;
 }
@@ -419,18 +439,24 @@ ${q.o.map((opt,i)=>`<button class="aopt" onclick="answer(${i})">${opt}</button>`
 function rCard(){
   const r=G.lastR,last=G.outs>=3,nxt=last?'See final score':'Next at bat →';
   if(r.ok){
-    const labels=['SINGLE','DOUBLE','TRIPLE','HOME RUN!'];
+    const labels=['SINGLE!','DOUBLE!','TRIPLE!','HOME RUN!'];
+    const icons=['⚾','⚾⚾','⚡','🔥'];
     const isHomer=r.t===3;
-    return`<div class="card apop" style="text-align:center">
-<div style="font-size:${isHomer?'36':'32'}px;font-weight:900;color:${isHomer?'#f59e0b':'var(--ok)'};line-height:1;margin-bottom:4px;letter-spacing:-.5px">${labels[r.t]}</div>
-${r.runs>0?`<div style="font-size:15px;font-weight:600;color:var(--ok);margin-bottom:8px">+${r.runs} run${r.runs!==1?'s':''}</div>`:'<div style="height:8px"></div>'}
+    const isTriple=r.t===2;
+    const titleColor=isHomer?'#f59e0b':isTriple?'var(--warn)':'var(--ok)';
+    const bgColor=isHomer?'linear-gradient(135deg,#fef3c7,#fde68a)':isTriple?'var(--bgwarn)':r.runs>0?'var(--bgsuccess)':'var(--bg)';
+    return`<div class="card apop" style="text-align:center;background:${bgColor}">
+<div style="font-size:32px;margin-bottom:4px">${icons[r.t]}</div>
+<div style="font-size:${isHomer?'38':'32'}px;font-weight:900;color:${titleColor};line-height:1;margin-bottom:6px;letter-spacing:-1px">${labels[r.t]}</div>
+${r.runs>0?`<div style="display:inline-block;background:var(--ok);color:white;font-size:14px;font-weight:800;padding:4px 14px;border-radius:20px;margin-bottom:10px">+${r.runs} run${r.runs!==1?'s':''}</div>`:'<div style="height:8px"></div>'}
 <p style="font-size:13px;color:var(--text2);margin:0 0 1rem;line-height:1.5">${r.fact}</p>
-<button onclick="nextPlay()">${nxt}</button>
+<button onclick="nextPlay()" class="btnp">${nxt}</button>
 </div>`;
   }
-  return`<div class="card apop" style="text-align:center">
-<div style="font-size:32px;font-weight:900;color:var(--no);line-height:1;margin-bottom:4px">OUT</div>
-<div style="font-size:13px;margin-bottom:8px;color:var(--text2)">Answer: <span style="font-weight:700;color:var(--text)">${r.ans}</span></div>
+  return`<div class="card apop" style="text-align:center;background:var(--bgdanger)">
+<div style="font-size:32px;margin-bottom:4px">💨</div>
+<div style="font-size:36px;font-weight:900;color:var(--no);line-height:1;margin-bottom:8px;letter-spacing:-1px">OUT</div>
+<div style="font-size:13px;margin-bottom:10px;color:var(--text2)">Correct answer: <span style="font-weight:700;color:var(--text)">${r.ans}</span></div>
 <p style="font-size:13px;color:var(--text2);margin:0 0 1rem;line-height:1.5">${r.fact}</p>
 <button onclick="nextPlay()">${nxt}</button>
 </div>`;
@@ -450,10 +476,11 @@ ${statusBar()}
 <div class="lay">
 <div class="dmw">${diamond()}</div>
 <div style="flex:1">
-<div class="card" style="text-align:center;padding:2rem 1rem">
-<div class="spinner" style="margin:0 auto 1rem"></div>
-<p style="font-size:14px;font-weight:600;margin:0 0 4px">Generating ${dnames[loadingDiff]} questions...</p>
-<p style="font-size:12px;color:var(--text2)">Just a few seconds</p>
+<div class="card" style="text-align:center;padding:2rem 1.25rem">
+<div style="font-size:36px;margin-bottom:.75rem;animation:bounce 1s ease infinite">⚾</div>
+<p style="font-size:15px;font-weight:800;margin:0 0 6px">Generating questions...</p>
+<p style="font-size:13px;color:var(--text2);margin:0 0 1rem">${dnames[loadingDiff]}</p>
+<div class="spinner" style="margin:0 auto"></div>
 </div>
 </div>
 </div>
@@ -468,11 +495,11 @@ ${statusBar()}
 ${fallbackNote}
 <h2 style="font-size:28px;font-weight:900;letter-spacing:-1px;margin:0 0 .4rem">You're on deck.</h2>
 <p style="color:var(--text2);font-size:14px;margin:0 0 1.5rem">One inning · play until 3 outs · choose your pitch · share your daily score</p>
-<div style="display:inline-grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 2rem;text-align:left;max-width:320px">
-<div style="background:var(--bg2);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bd)"><div class="lbl" style="color:var(--text2)">Easy</div><div style="font-size:16px;font-weight:800;color:var(--text2)">Single</div></div>
-<div style="background:var(--bginfo);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bdinfo)"><div class="lbl" style="color:var(--info)">Medium</div><div style="font-size:16px;font-weight:800;color:var(--info)">Double</div></div>
-<div style="background:var(--bgwarn);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bdwarn)"><div class="lbl" style="color:var(--warn)">Hard</div><div style="font-size:16px;font-weight:800;color:var(--warn)">Triple</div></div>
-<div style="background:var(--bgdanger);border-radius:var(--rl);padding:10px 14px;border:1px solid var(--bdno)"><div class="lbl" style="color:var(--no)">Expert</div><div style="font-size:16px;font-weight:800;color:var(--no)">Homer</div></div>
+<div style="display:inline-grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 2rem;text-align:left;max-width:320px">
+<div style="background:var(--bg2);border-radius:var(--rl);padding:12px 14px;border:2px solid var(--bd)"><div style="font-size:20px;margin-bottom:4px">⚾</div><div class="lbl" style="color:var(--text2)">Easy</div><div style="font-size:18px;font-weight:900;color:var(--text2)">Single</div></div>
+<div style="background:var(--bginfo);border-radius:var(--rl);padding:12px 14px;border:2px solid var(--bdinfo)"><div style="font-size:20px;margin-bottom:4px">🎯</div><div class="lbl" style="color:var(--info)">Medium</div><div style="font-size:18px;font-weight:900;color:var(--info)">Double</div></div>
+<div style="background:var(--bgwarn);border-radius:var(--rl);padding:12px 14px;border:2px solid var(--bdwarn)"><div style="font-size:20px;margin-bottom:4px">⚡</div><div class="lbl" style="color:var(--warn)">Hard</div><div style="font-size:18px;font-weight:900;color:var(--warn)">Triple</div></div>
+<div style="background:var(--bgdanger);border-radius:var(--rl);padding:12px 14px;border:2px solid var(--bdno)"><div style="font-size:20px;margin-bottom:4px">🔥</div><div class="lbl" style="color:var(--no)">Expert</div><div style="font-size:18px;font-weight:900;color:var(--no)">Homer</div></div>
 </div>
 <div style="margin:0 0 1.25rem">
 <input id="nick-inp" type="text" maxlength="20" placeholder="Your name (optional, for leaderboard)"
@@ -498,9 +525,10 @@ style="width:100%;max-width:280px;padding:9px 14px;border-radius:var(--r);border
 <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">${plays}</div>
 <div style="font-size:11px;color:var(--text2)">S=single · D=double · T=triple · H=homer · ⚾=hit · 💨=out</div>
 </div>
-<div style="text-align:center;padding:1rem 0">
-<div style="font-size:56px;font-weight:900;line-height:1;letter-spacing:-2.5px">${G.score}</div>
-<div style="color:var(--text2);font-size:14px;margin-top:4px">run${G.score!==1?'s':''} &middot; <span style="font-weight:700;color:var(--text)">${grade(G.score)}</span></div>
+<div style="text-align:center;padding:1.25rem 0;background:linear-gradient(135deg,var(--bg2),var(--bg3));border-radius:var(--rl);margin:.75rem 0">
+<div style="font-size:64px;font-weight:900;line-height:1;letter-spacing:-3px;color:var(--accent)">${G.score}</div>
+<div style="font-size:15px;color:var(--text2);margin-top:6px">run${G.score!==1?'s':''}</div>
+<div style="display:inline-block;margin-top:8px;background:var(--text);color:var(--bg);font-size:13px;font-weight:800;padding:5px 16px;border-radius:20px">${grade(G.score)}</div>
 </div>
 <div style="text-align:center;margin:.5rem 0">
 ${streak>1?`<span style="font-size:13px;font-weight:700;color:var(--warn)">🔥 ${streak}-day streak</span>`:''}
