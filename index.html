@@ -135,36 +135,43 @@ let POOLS = {0:[],1:[],2:[],3:[]};
 let fetchingMore = {0:false,1:false,2:false,3:false};
 let loadingDiff = null;
 
-/* Load cached pools from localStorage on startup */
+/* Load all 4 cached pools from localStorage on startup */
 function loadCachedPools(){
   try{
-    const cached = JSON.parse(localStorage.getItem(`dt_v7_${getTodayDate()}`)||'{}');
-    if(cached[0]?.length) POOLS[0]=cached[0];
-    if(cached[1]?.length) POOLS[1]=cached[1];
-    if(cached[2]?.length) POOLS[2]=cached[2];
-    if(cached[3]?.length) POOLS[3]=cached[3];
+    const cached = JSON.parse(localStorage.getItem(`dt_v8_${getTodayDate()}`)||'{}');
+    for(const d of [0,1,2,3]){
+      if(cached[d]?.length) POOLS[d]=cached[d];
+    }
   }catch(e){}
 }
 
-/* Fetch questions for one difficulty from server */
+/* Fetch ALL 4 pools at once from server — call once, all difficulties ready */
 async function fetchPool(d, offset){
   try{
     const res = await fetch('/.netlify/functions/questions',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({date:getTodayDate(), difficulty:d, offset:offset||0})
+      body:JSON.stringify({date:getTodayDate()})
     });
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const qs = await res.json();
-    if(Array.isArray(qs) && qs.length > 0){
-      POOLS[d] = [...(POOLS[d]||[]), ...qs];
-      try{
-        const ck = `dt_v7_${getTodayDate()}`;
-        const c = JSON.parse(localStorage.getItem(ck)||'{}');
-        c[d]=POOLS[d]; localStorage.setItem(ck,JSON.stringify(c));
-      }catch(e){}
-      return true;
+    const data = await res.json();
+
+    // Response is {"0":[...],"1":[...],"2":[...],"3":[...]}
+    let gotAny = false;
+    for(const k of ['0','1','2','3']){
+      const dk=parseInt(k);
+      if(Array.isArray(data[k]) && data[k].length>0){
+        POOLS[dk] = data[k];
+        gotAny = true;
+      }
     }
+    // Cache all pools in localStorage
+    if(gotAny){
+      try{
+        localStorage.setItem(`dt_v8_${getTodayDate()}`,JSON.stringify(POOLS));
+      }catch(e){}
+    }
+    return gotAny;
   }catch(e){ console.warn('fetchPool failed:',e); }
   return false;
 }
@@ -278,7 +285,9 @@ function doHit(t){
 
 async function selectDiff(d){
   G.selD=d;
-  if(!POOLS[d]||POOLS[d].length===0){
+  // If any pool is empty, fetch all 4 together (single server call)
+  const anyEmpty=[0,1,2,3].some(i=>!POOLS[i]||POOLS[i].length===0);
+  if(anyEmpty){
     loadingDiff=d;G.phase='loading_q';render();
     await fetchPool(d,0);
     loadingDiff=null;
