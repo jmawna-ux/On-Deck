@@ -79,7 +79,32 @@ exports.handler = async (event) => {
   const store = getBlobs();
 
   try {
-    const {date} = JSON.parse(event.body||'{}');
+    const body = JSON.parse(event.body||'{}');
+    const {date, difficulty, overflow} = body;
+
+    // OVERFLOW MODE: generate more questions for one difficulty
+    if (overflow && date && difficulty !== undefined) {
+      const ovfKey = `v8-ovf-${date}-${difficulty}-${Date.now()}`;
+      console.log('Overflow request for difficulty', difficulty);
+      const topics = getDayTopics(date);
+      const recentQs = await getRecentHistory(store);
+      const avoidStr = recentQs.length > 0
+        ? '\nAvoid these already-used topics:\n' + recentQs.slice(0,30).map((q,i) => (i+1) + '. ' + q).join('\n')
+        : '';
+      const client = new Anthropic({apiKey: process.env.ANTHROPIC_API_KEY});
+      const prompt = 'Generate 6 more trivia questions for ' + date + '. Return ONLY a JSON array:\n[{"q":"?","o":["A","B","C","D"],"a":0,"f":"fun fact"}]\nDifficulty: ' + DIFF_DESC[difficulty] + '\nTopics: ' + topics.join(', ') + '\nRules: unique subjects, genuinely interesting, not overused.' + avoidStr + '\nReturn ONLY the JSON array.';
+      const msg = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        messages: [{role:'user', content: prompt}]
+      });
+      const text = msg.content.find(b=>b.type==='text')?.text ?? '[]';
+      const questions = JSON.parse(text.replace(/```json?|```/g,'').trim());
+      console.log('Overflow generated', questions.length, 'questions');
+      await saveHistory(store, date, {0:[],1:[],2:[],3:[],...{[difficulty]:questions}});
+      return {statusCode:200,headers:h,body:JSON.stringify(questions)};
+    }
+
     if (!date) return {statusCode:400,headers:h,body:JSON.stringify({error:'Missing date'})};
 
     // Try to load all 4 pools from cache
@@ -115,7 +140,7 @@ exports.handler = async (event) => {
       messages: [{
         role: 'user',
         content: `Generate trivia questions for ${date}. Return ONLY this JSON object, no markdown:
-{"0":[6 easy],"1":[6 medium],"2":[6 hard],"3":[6 expert]}
+{"0":[8 easy],"1":[8 medium],"2":[8 hard],"3":[8 expert]}
 
 Each question: {"q":"?","o":["A","B","C","D"],"a":0,"f":"fun fact"}
 "a" = 0-indexed correct answer.
@@ -129,7 +154,7 @@ Difficulty levels:
 Today's topics: ${topics.join(', ')}
 
 STRICT RULES:
-- 24 questions total — every question on a UNIQUE subject (no topic repeats across all difficulty levels)
+- 32 questions total — every question on a UNIQUE subject (no topic repeats across all difficulty levels)
 - Spread questions across all 8 topic areas
 - Fun fact = 1 genuinely interesting sentence
 - 4 plausible options, exactly one correct
