@@ -300,9 +300,8 @@ function doHit(t){
 
 async function selectDiff(d){
   G.selD=d;
-  // If any pool is empty, fetch all 4 together (single server call)
-  const anyEmpty=[0,1,2,3].some(i=>!POOLS[i]||POOLS[i].length===0);
-  if(anyEmpty){
+  // Fallback: if pool still empty after startGame loaded (shouldn't happen normally)
+  if(!POOLS[d]||POOLS[d].length===0){
     loadingDiff=d;G.phase='loading_q';render();
     await fetchPool(d,0);
     loadingDiff=null;
@@ -332,11 +331,18 @@ function nextPlay(){
   G.phase='select';render();
 }
 
-function startGame(){
+async function startGame(){
   const inp=document.getElementById('nick-inp');
   if(inp&&inp.value.trim()){
     nickname=inp.value.trim().substring(0,20);
     localStorage.setItem('dt_nickname',nickname);
+  }
+  // Check if any pools are missing — load all 4 before game starts
+  const anyEmpty=[0,1,2,3].some(i=>!POOLS[i]||POOLS[i].length===0);
+  if(anyEmpty){
+    loadingDiff='lineup';G.phase='loading_q';render();
+    await fetchPool(0,0);
+    loadingDiff=null;
   }
   G.phase='select';render();
 }
@@ -494,16 +500,25 @@ const root = document.getElementById('root');
 function render(){
   /* ── Loading screen ── */
   if(G.phase==='loading_q'){
+    const isLineup = loadingDiff==='lineup';
     const dnames=['Easy — Single','Medium — Double','Hard — Triple','Expert — Homer'];
-    root.innerHTML=`<div>
+    const loadMsg = isLineup
+      ? 'Crafting a fresh lineup for today...'
+      : 'Generating ' + (dnames[loadingDiff]||'') + ' questions...';
+    root.innerHTML=isLineup ? `<div style="text-align:center;padding:3.5rem 1rem">
+<div style="font-size:48px;margin-bottom:1rem;animation:bounce 1s ease infinite">⚾</div>
+<h3 style="font-size:18px;font-weight:800;margin:0 0 6px">Crafting a fresh lineup for today</h3>
+<p style="font-size:13px;color:var(--text2);margin:0 0 1.5rem">All 4 difficulty levels loading at once</p>
+<div class="spinner" style="margin:0 auto"></div>
+<p style="font-size:11px;color:var(--text2);margin-top:1.25rem">Takes about 15 seconds on the first play each day</p>
+</div>` : `<div>
 ${statusBar()}
 <div class="lay">
 <div class="dmw">${diamond()}</div>
 <div style="flex:1">
 <div class="card" style="text-align:center;padding:2rem 1.25rem">
 <div style="font-size:36px;margin-bottom:.75rem;animation:bounce 1s ease infinite">⚾</div>
-<p style="font-size:15px;font-weight:800;margin:0 0 6px">Generating questions...</p>
-<p style="font-size:13px;color:var(--text2);margin:0 0 1rem">${dnames[loadingDiff]}</p>
+<p style="font-size:15px;font-weight:800;margin:0 0 6px">${loadMsg}</p>
 <div class="spinner" style="margin:0 auto"></div>
 </div>
 </div>
