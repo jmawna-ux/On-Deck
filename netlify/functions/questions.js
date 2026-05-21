@@ -92,10 +92,10 @@ exports.handler = async (event) => {
         ? '\nAvoid these already-used topics:\n' + recentQs.slice(0,30).map((q,i) => (i+1) + '. ' + q).join('\n')
         : '';
       const client = new Anthropic({apiKey: process.env.ANTHROPIC_API_KEY});
-      const prompt = 'Generate 6 more trivia questions for ' + date + '. Return ONLY a JSON array:\n[{"q":"?","o":["A","B","C","D"],"a":0,"f":"fun fact"}]\nDifficulty: ' + DIFF_DESC[difficulty] + '\nTopics: ' + topics.join(', ') + '\nRules: unique subjects, genuinely interesting, not overused.' + avoidStr + '\nReturn ONLY the JSON array.';
+      const prompt = 'Generate 10 more trivia questions for ' + date + '. Return ONLY a JSON array:\n[{"q":"?","o":["A","B","C","D"],"a":0,"f":"fun fact"}]\nDifficulty: ' + DIFF_DESC[difficulty] + '\nTopics: ' + topics.join(', ') + '\nRules: unique subjects, genuinely interesting, not overused.' + avoidStr + '\nReturn ONLY the JSON array.';
       const msg = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
+        max_tokens: 2000,
         messages: [{role:'user', content: prompt}]
       });
       const text = msg.content.find(b=>b.type==='text')?.text ?? '[]';
