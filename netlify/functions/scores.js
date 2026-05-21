@@ -38,31 +38,50 @@ exports.handler = async (event) => {
   const h = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: h, body: '' };
 
+  console.log('scores called:', new Date().toISOString());
+
   const store = getBlobs();
-  if (!store) return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: [] }) };
+  if (!store) {
+    console.error('Blobs store not available');
+    return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: [] }) };
+  }
 
   try {
     const { action, nickname, score, date } = JSON.parse(event.body || '{}');
     const key = monthKey();
+    console.log('Action:', action, 'Key:', key, 'Nickname:', nickname, 'Score:', score);
+
     let scores = [];
-    try { scores = await store.get(key, { type: 'json' }) || []; } catch(e) {}
+    try {
+      scores = await store.get(key, { type: 'json' }) || [];
+      console.log('Loaded', scores.length, 'existing scores');
+    } catch(e) {
+      console.log('No existing scores for key:', key, e.message);
+    }
 
     if (action === 'submit') {
       if (!nickname || score === undefined) {
         return { statusCode: 400, headers: h, body: JSON.stringify({ error: 'Missing fields' }) };
       }
-      // Replace any previous score from this player today (keep only best per day)
       scores = scores.filter(e => !(e.nickname === nickname && e.date === date));
       scores.push({ nickname: nickname.substring(0, 20).trim(), score, date, ts: Date.now() });
       if (scores.length > 2000) scores = scores.slice(-2000);
-      await store.set(key, JSON.stringify(scores));
+      try {
+        await store.set(key, JSON.stringify(scores));
+        console.log('Saved', scores.length, 'scores');
+      } catch(e) {
+        console.error('Failed to save scores:', e.message);
+      }
       const lb = topScores(scores);
       const rank = lb.findIndex(e => e.nickname === nickname) + 1;
+      console.log('Leaderboard size:', lb.length, 'Rank:', rank);
       return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: lb, rank: rank || null }) };
     }
 
     if (action === 'get') {
-      return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: topScores(scores) }) };
+      const lb = topScores(scores);
+      console.log('Get leaderboard, size:', lb.length);
+      return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: lb }) };
     }
 
     return { statusCode: 400, headers: h, body: JSON.stringify({ error: 'Invalid action' }) };
