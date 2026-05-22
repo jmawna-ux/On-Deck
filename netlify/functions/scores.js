@@ -6,14 +6,8 @@
  */
 
 function getBlobs() {
-  try {
-    const { getStore } = require('@netlify/blobs');
-    const store = getStore({ name: 'on-deck', consistency: 'strong' });
-    return store;
-  } catch (e) {
-    console.error('getBlobs error:', e.message);
-    return null;
-  }
+  try { const { getStore } = require('@netlify/blobs'); return getStore('on-deck'); }
+  catch (e) { console.error('getBlobs failed:', e.message); return null; }
 }
 
 function monthKey() {
