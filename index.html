@@ -529,23 +529,21 @@ ${statusBar()}
 
   /* ── Start screen ── */
   if(G.phase==='start'){
-    const already=localStorage.getItem(SAVE_KEY);
-    root.innerHTML=`<div style="text-align:center;padding:3rem 1.5rem 2rem">
-<div style="font-size:56px;margin-bottom:1rem">&#x26BE;</div>
-<h1 style="font-size:32px;font-weight:900;letter-spacing:-1.5px;margin:0 0 .5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">On Deck</h1>
-<p style="color:var(--text2);font-size:15px;margin:0 0 2.5rem;line-height:1.6">Daily trivia &middot; one inning &middot; 3 outs<br>Choose your pitch difficulty each at-bat</p>
-<div style="margin:0 auto 2rem;max-width:280px">
-<input id="nick-inp" type="text" maxlength="20" placeholder="Your name (for leaderboard)"
-value="${nickname}"
-style="width:100%;padding:11px 16px;border-radius:var(--r);border:1.5px solid var(--bd);background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit;text-align:center;outline:none">
-</div>
-<button class="btnp" onclick="startGame()" style="padding:18px 56px;font-size:21px;border-radius:16px;letter-spacing:.01em;box-shadow:0 8px 28px rgba(232,93,4,.5)">&#x26BE; Play ball</button>
-<p style="margin:1.5rem 0 0;font-size:12px;color:var(--text2)">${already?"You've already played today — come back tomorrow":"New questions every day &middot; free forever"}</p>
-</div>`;
+    const already=!!localStorage.getItem(SAVE_KEY);
+    const subtext=already?'You\'ve already played today \u2014 come back tomorrow':'New questions every day \u00b7 free forever';
+    root.innerHTML='<div style="text-align:center;padding:3rem 1.5rem 2rem">'
+      +'<div style="font-size:64px;margin-bottom:.75rem">\u26be</div>'
+      +'<h1 style="font-size:34px;font-weight:900;letter-spacing:-1.5px;margin:0 0 .5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">On Deck</h1>'
+      +'<p style="color:var(--text2);font-size:15px;margin:0 0 2.5rem;line-height:1.6">Daily trivia \u00b7 one inning \u00b7 3 outs<br>Choose your pitch difficulty each at-bat</p>'
+      +'<div style="margin:0 auto 1.75rem;max-width:280px">'
+      +'<input id="nick-inp" type="text" maxlength="20" placeholder="Your name (for leaderboard)" value="'+nickname+'" style="width:100%;padding:11px 16px;border-radius:var(--r);border:1.5px solid var(--bd);background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit;text-align:center;outline:none">'
+      +'</div>'
+      +'<button class="btnp" onclick="startGame()" style="padding:18px 56px;font-size:22px;border-radius:16px;letter-spacing:.01em;box-shadow:0 8px 28px rgba(232,93,4,.5)">\u26be Play ball</button>'
+      +'<p style="margin:1.5rem 0 0;font-size:12px;color:var(--text2)">'+subtext+'</p>'
+      +'</div>';
     return;
-  }  }
-
-  /* ── Done screen ── */
+  }
+    /* ── Done screen ── */
   if(G.phase==='done'){
     const dc=['S','D','T','H'];
     const plays=G.log.map(p=>{
