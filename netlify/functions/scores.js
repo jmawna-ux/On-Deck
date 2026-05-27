@@ -1,14 +1,7 @@
 /**
- * On Deck — Scores & Leaderboard API
- *
- * POST { action: 'submit', nickname, score, date }  → save score, return leaderboard
- * POST { action: 'get' }                             → return current month leaderboard
+ * On Deck — Scores & Leaderboard
+ * Uses a dedicated 'on-deck-scores' Blobs store
  */
-
-function getBlobs() {
-  try { const { getStore } = require('@netlify/blobs'); return getStore('on-deck'); }
-  catch (e) { console.error('getBlobs failed:', e.message); return null; }
-}
 
 function monthKey() {
   const d = new Date();
@@ -16,11 +9,15 @@ function monthKey() {
 }
 
 function gradeFor(r) {
-  return r===0?'Three up, three down':r<=2?'Bench Player':r<=4?'Starting Lineup':r<=6?'All-Star':r<=9?'MVP':'World Series Legend';
+  if (r===0) return 'Three up, three down';
+  if (r<=2) return 'Bench Player';
+  if (r<=4) return 'Starting Lineup';
+  if (r<=6) return 'All-Star';
+  if (r<=9) return 'MVP';
+  return 'World Series Legend';
 }
 
 function topScores(scores) {
-  // Best score per nickname for the month
   const best = {};
   for (const e of scores) {
     const nick = e.nickname;
@@ -40,23 +37,32 @@ exports.handler = async (event) => {
 
   console.log('scores called:', new Date().toISOString());
 
-  const store = getBlobs();
-  if (!store) {
-    console.error('Blobs store not available');
-    return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: [] }) };
+  // Get Blobs store — use dedicated store name for scores
+  let store = null;
+  try {
+    const blobs = require('@netlify/blobs');
+    console.log('blobs keys:', Object.keys(blobs).join(','));
+    store = blobs.getStore('on-deck-scores');
+    console.log('store created:', !!store);
+  } catch(e) {
+    console.error('Blobs init error:', e.message);
   }
 
   try {
     const { action, nickname, score, date } = JSON.parse(event.body || '{}');
+    console.log('action:', action, 'nickname:', nickname, 'score:', score);
+
     const key = monthKey();
-    console.log('Action:', action, 'Key:', key, 'Nickname:', nickname, 'Score:', score);
+    console.log('month key:', key, 'store available:', !!store);
 
     let scores = [];
-    try {
-      scores = await store.get(key, { type: 'json' }) || [];
-      console.log('Loaded', scores.length, 'existing scores');
-    } catch(e) {
-      console.log('No existing scores for key:', key, e.message);
+    if (store) {
+      try {
+        scores = await store.get(key, { type: 'json' }) || [];
+        console.log('loaded scores:', scores.length);
+      } catch(e) {
+        console.log('get failed (first time is ok):', e.message);
+      }
     }
 
     if (action === 'submit') {
@@ -66,27 +72,31 @@ exports.handler = async (event) => {
       scores = scores.filter(e => !(e.nickname === nickname && e.date === date));
       scores.push({ nickname: nickname.substring(0, 20).trim(), score, date, ts: Date.now() });
       if (scores.length > 2000) scores = scores.slice(-2000);
-      try {
-        await store.set(key, JSON.stringify(scores));
-        console.log('Saved', scores.length, 'scores');
-      } catch(e) {
-        console.error('Failed to save scores:', e.message);
+
+      if (store) {
+        try {
+          await store.set(key, JSON.stringify(scores));
+          console.log('saved scores:', scores.length);
+        } catch(e) {
+          console.error('save failed:', e.message);
+        }
       }
+
       const lb = topScores(scores);
       const rank = lb.findIndex(e => e.nickname === nickname) + 1;
-      console.log('Leaderboard size:', lb.length, 'Rank:', rank);
+      console.log('leaderboard size:', lb.length, 'rank:', rank);
       return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: lb, rank: rank || null }) };
     }
 
     if (action === 'get') {
       const lb = topScores(scores);
-      console.log('Get leaderboard, size:', lb.length);
+      console.log('get leaderboard size:', lb.length);
       return { statusCode: 200, headers: h, body: JSON.stringify({ leaderboard: lb }) };
     }
 
     return { statusCode: 400, headers: h, body: JSON.stringify({ error: 'Invalid action' }) };
   } catch (err) {
-    console.error('Scores error:', err.message);
+    console.error('Handler error:', err.message);
     return { statusCode: 500, headers: h, body: JSON.stringify({ leaderboard: [] }) };
   }
 };
