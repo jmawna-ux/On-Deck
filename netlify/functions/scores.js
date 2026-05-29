@@ -40,10 +40,13 @@ exports.handler = async (event) => {
   // Get Blobs store — use dedicated store name for scores
   let store = null;
   try {
-    const blobs = require('@netlify/blobs');
-    console.log('blobs keys:', Object.keys(blobs).join(','));
-    store = blobs.getStore('on-deck-scores');
-    console.log('store created:', !!store);
+    const { getStore } = require('@netlify/blobs');
+    store = getStore({
+      name: 'on-deck-scores',
+      siteID: process.env.SITE_ID,
+      token: process.env.NETLIFY_TOKEN,
+    });
+    console.log('store ready, siteID:', process.env.SITE_ID ? 'set' : 'MISSING');
   } catch(e) {
     console.error('Blobs init error:', e.message);
   }

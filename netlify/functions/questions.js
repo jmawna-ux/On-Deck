@@ -41,9 +41,12 @@ function getDayTopics(date) {
 
 function getBlobs(event) {
   try {
-    const { connectLambda, getStore } = require('@netlify/blobs');
-    if (event) connectLambda(event);
-    return getStore('on-deck');
+    const { getStore } = require('@netlify/blobs');
+    return getStore({
+      name: 'on-deck',
+      siteID: process.env.SITE_ID,
+      token: process.env.NETLIFY_TOKEN,
+    });
   } catch(e) { return null; }
 }
 
