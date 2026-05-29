@@ -39,8 +39,12 @@ function getDayTopics(date) {
   return arr.slice(0, 8);
 }
 
-function getBlobs() {
-  try { const {getStore}=require('@netlify/blobs'); return getStore('on-deck'); } catch(e) { return null; }
+function getBlobs(event) {
+  try {
+    const { connectLambda, getStore } = require('@netlify/blobs');
+    if (event) connectLambda(event);
+    return getStore('on-deck');
+  } catch(e) { return null; }
 }
 
 async function getRecentHistory(store) {
@@ -76,7 +80,7 @@ exports.handler = async (event) => {
   console.log('questions called:', new Date().toISOString());
   if (!process.env.ANTHROPIC_API_KEY) return {statusCode:500,headers:h,body:JSON.stringify({error:'API key not configured'})};
 
-  const store = getBlobs();
+  const store = getBlobs(event);
 
   try {
     const body = JSON.parse(event.body||'{}');
@@ -136,11 +140,11 @@ exports.handler = async (event) => {
     const client = new Anthropic({apiKey: process.env.ANTHROPIC_API_KEY});
     const msg = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 5000,
+      max_tokens: 7000,
       messages: [{
         role: 'user',
         content: `Generate trivia questions for ${date}. Return ONLY this JSON object, no markdown:
-{"0":[8 easy],"1":[8 medium],"2":[8 hard],"3":[8 expert]}
+{"0":[15 easy],"1":[10 medium],"2":[10 hard],"3":[10 expert]}
 
 Each question: {"q":"?","o":["A","B","C","D"],"a":0,"f":"fun fact"}
 "a" = 0-indexed correct answer.
@@ -154,11 +158,12 @@ Difficulty levels:
 Today's topics: ${topics.join(', ')}
 
 STRICT RULES:
-- 32 questions total — every question on a UNIQUE subject (no topic repeats across all difficulty levels)
+- 45 questions total — every question on a UNIQUE subject (no topic repeats across all difficulty levels)
 - Spread questions across all 8 topic areas
 - Fun fact = 1 genuinely interesting sentence
 - 4 plausible options, exactly one correct
-- NO overused questions (no country capitals, no solar system planets)
+- NO overused questions — especially for easy: no country capitals, no solar system planets, no Harry Potter, no "fastest animal", no "largest ocean", no "who painted the Mona Lisa", no "what year did X happen" for famous events everyone knows
+- For easy questions specifically: find genuinely interesting facts that most people know but don't get asked about often — food origins, animal behaviors, historical firsts, word origins, geography surprises
 - Difficulty must be real — Easy widely known, Expert genuinely obscure${avoidStr}
 
 Return ONLY the JSON object.`
