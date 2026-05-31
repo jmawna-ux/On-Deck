@@ -22,6 +22,7 @@ const ALL_TOPICS = [
   'world religions','philosophy and ideas','mythology and folklore',
   'language and etymology','food and cuisine',
   'sports history and records','animals and wildlife',
+  'pop culture and entertainment','politics and world leaders','sports rules and records',
 ];
 
 const DIFF_DESC = [
