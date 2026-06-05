@@ -51,13 +51,15 @@ function getBlobs(event) {
   } catch(e) { return null; }
 }
 
-async function getRecentHistory(store) {
+async function getRecentHistory(store, primaryDiff) {
   if (!store) return [];
   const all = [];
   await Promise.all([0,1,2,3].map(async d => {
     try {
       const h = await store.get(`history-d${d}`, {type:'json'}) || [];
-      all.push(...h.slice(-20).flatMap(e => e.questions));
+      // Look back further for the primary difficulty (singles gets most play)
+      const days = (d === primaryDiff) ? 60 : 30;
+      all.push(...h.slice(-days).flatMap(e => e.questions));
     } catch(e) {}
   }));
   return [...new Set(all)];
@@ -71,7 +73,14 @@ async function saveHistory(store, date, pools) {
     try {
       let hist = [];
       try { hist = await store.get(`history-d${d}`, {type:'json'}) || []; } catch(e) {}
-      hist.push({date, questions: pool.map(q=>q.q)});
+      // Merge into existing date entry (keeps one entry per day)
+      const idx = hist.findIndex(e => e.date === date);
+      const newQs = pool.map(q=>q.q);
+      if (idx >= 0) {
+        hist[idx].questions = [...new Set([...hist[idx].questions, ...newQs])];
+      } else {
+        hist.push({date, questions: newQs});
+      }
       if (hist.length > 450) hist = hist.slice(-450);
       await store.set(`history-d${d}`, JSON.stringify(hist));
     } catch(e) {}
@@ -134,9 +143,11 @@ exports.handler = async (event) => {
 
     // Generate all 4 in one call (guarantees no cross-difficulty duplicates)
     const topics = getDayTopics(date);
-    const recentQs = await getRecentHistory(store);
-    const avoidStr = recentQs.length > 0
-      ? `\n\nDO NOT repeat topics from these recently used questions:\n${recentQs.slice(0,40).map((q,i)=>`${i+1}. ${q}`).join('\n')}`
+    const recentQs = await getRecentHistory(store, 0); // 0=singles gets deepest history
+    // Shuffle so Claude sees different questions each generation
+    const shuffled = recentQs.sort(() => Math.random() - 0.5);
+    const avoidStr = shuffled.length > 0
+      ? `\n\nDO NOT use questions on the same specific topic as any of these (last 60 days of singles, 30 days of others):\n${shuffled.slice(0,80).map((q,i)=>`${i+1}. ${q}`).join('\n')}`
       : '';
 
     console.log('Generating all 4 pools for', date, '- topics:', topics.join(', '));
